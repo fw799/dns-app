@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dns-app
+  labels:
+    app: dns-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dns-app
+  template:
+    metadata:
+      labels:
+        app: dns-app
+    spec:
+      containers:
+      - name: AS
+        image: feiw2023/AS:latest
+      - name: FS
+        image: feiw2023/FS:latest
+        ports:
+        - containerPort: 9090
+      - name: US
+        image: feiw2023/US:latest
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: AS-service
+spec:
+  type: NodePort
+  ports:
+  - nodePort: 30001
+  selector:
+    app: AS
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: FS-service
+spec:
+  type: NodePort
+  ports:
+  - port: 9090
+    nodePort: 30002
+    protocol: TCP
+  selector:
+    app: FS
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: US-service
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    nodePort: 30003
+    protocol: TCP
+  selector:
+    app: US
